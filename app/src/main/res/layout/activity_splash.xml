@@ -73,14 +73,14 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnStart"
+        android:layout_marginTop="25dp"
         style="@style/Widget.MusicPlayer.PrimaryButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/spacing_xl"
         android:background="@drawable/gradient_button_bg"
         android:text="@string/get_started"
         app:backgroundTint="@null"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvTagline"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
