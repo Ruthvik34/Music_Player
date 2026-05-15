@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Music Player</string>
+    <string name="splash_tagline">Your music, beautifully played</string>
+    <string name="get_started">Get Started</string>
+    <string name="library_title">Your Library</string>
+    <string name="library_subtitle">%1$d songs</string>
+    <string name="library_subtitle_with_likes">%1$d songs · %2$d liked</string>
+    <string name="library_subtitle_empty">No songs yet</string>
+    <string name="empty_library_title">No music found</string>
+    <string name="empty_library_message">Add audio files to your device or grant storage permission to browse your library.</string>
+    <string name="permission_denied">Permission denied. Cannot load songs.</string>
+    <string name="no_songs_available">No songs available</string>
+    <string name="now_playing">Now Playing</string>
+    <string name="unknown_title">Unknown</string>
+    <string name="unknown_artist">Unknown Artist</string>
+    <string name="play_song">Play song</string>
+    <string name="open_player">Open player</string>
+    <string name="like_song">Like song</string>
+    <string name="unlike_song">Unlike song</string>
+    <string name="added_to_likes">Added to likes</string>
+    <string name="removed_from_likes">Removed from likes</string>
+    <string name="shuffle">Shuffle</string>
+    <string name="repeat">Repeat</string>
+</resources>

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="@dimen/spacing_sm"
+    android:background="@drawable/song_item_bg"
+    android:padding="@dimen/spacing_md">
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/ivArtist"
+        android:layout_width="@dimen/album_art_list"
+        android:layout_height="@dimen/album_art_list"
+        android:contentDescription="@null"
+        android:scaleType="centerCrop"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:shapeAppearanceOverlay="@style/ShapeAppearance.MusicPlayer.AlbumSmall"
+        tools:src="@tools:sample/avatars" />
+
+    <TextView
+        android:id="@+id/tvSongTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_md"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textColor="@color/text_primary"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@id/tvArtist"
+        app:layout_constraintEnd_toStartOf="@id/ivLike"
+        app:layout_constraintStart_toEndOf="@id/ivArtist"
+        app:layout_constraintTop_toTopOf="@id/ivArtist"
+        app:layout_constraintVertical_chainStyle="packed"
+        tools:text="Song Title" />
+
+    <TextView
+        android:id="@+id/tvArtist"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_md"
+        android:layout_marginTop="2dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textColor="@color/text_secondary"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toBottomOf="@id/ivArtist"
+        app:layout_constraintEnd_toStartOf="@id/ivLike"
+        app:layout_constraintStart_toEndOf="@id/ivArtist"
+        app:layout_constraintTop_toBottomOf="@id/tvSongTitle"
+        tools:text="Artist Name" />
+
+    <ImageButton
+        android:id="@+id/ivLike"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/like_song"
+        android:padding="6dp"
+        android:scaleType="centerInside"
+        android:src="@drawable/outline_favorite_24"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/ivPlayHint"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/text_hint" />
+
+    <ImageButton
+        android:id="@+id/ivPlayHint"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/play_song"
+        android:padding="8dp"
+        android:scaleType="centerInside"
+        android:src="@drawable/ic_play_arrow_24"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/accent_secondary" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
