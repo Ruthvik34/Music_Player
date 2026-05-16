@@ -31,6 +31,8 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         binding.main.applySystemBarInsets()
+        requestNotificationPermissionIfNeeded()
+        setupSearchButton()
         binding.rvSongsList.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         checkPermissionsAndLoadSongs()
@@ -44,6 +46,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStop() {
         PlaybackManager.removeUiListener(playbackUiListener)
+        PlaybackManager.ensureNotificationService(this)
         super.onStop()
     }
 
@@ -170,6 +173,23 @@ class MainActivity : AppCompatActivity() {
         binding.rvSongsList.isVisible = count > 0
     }
 
+    private fun setupSearchButton() {
+        binding.btnSearch.setOnClickListener {
+            startActivity(Intent(this, SearchActivity::class.java))
+        }
+    }
+
+    private fun requestNotificationPermissionIfNeeded() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU &&
+            ContextCompat.checkSelfPermission(
+                this,
+                android.Manifest.permission.POST_NOTIFICATIONS
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            requestNotificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
+
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -189,4 +209,7 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, R.string.permission_denied, Toast.LENGTH_SHORT).show()
             }
         }
+
+    private val requestNotificationPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
 }

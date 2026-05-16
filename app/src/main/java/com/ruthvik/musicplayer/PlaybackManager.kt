@@ -2,8 +2,11 @@ package com.ruthvik.musicplayer
 
 import android.content.ContentUris
 import android.content.Context
+import android.content.Intent
+import android.os.Build
 import android.net.Uri
 import android.provider.MediaStore
+import androidx.core.content.ContextCompat
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
@@ -13,6 +16,7 @@ import com.ruthvik.musicplayer.Models.Song
 object PlaybackManager {
 
     private var exoPlayer: ExoPlayer? = null
+    private var appContext: Context? = null
     private var songList: ArrayList<Song> = arrayListOf()
     var currentIndex: Int = -1
         private set
@@ -46,6 +50,7 @@ object PlaybackManager {
     }
 
     fun init(context: Context) {
+        appContext = context.applicationContext
         if (exoPlayer == null) {
             exoPlayer = ExoPlayer.Builder(context.applicationContext)
                 .build()
@@ -93,6 +98,9 @@ object PlaybackManager {
     fun hasActiveMedia(): Boolean =
         songList.isNotEmpty() &&
             (exoPlayer?.playbackState ?: Player.STATE_IDLE) != Player.STATE_IDLE
+
+    fun shouldShowNotification(): Boolean =
+        hasActiveMedia() && !shouldStayPaused
 
     fun isPlaying(): Boolean = exoPlayer?.isPlaying == true
 
@@ -144,7 +152,9 @@ object PlaybackManager {
     }
 
     fun play() {
+        shouldStayPaused = false
         exoPlayer?.play()
+        appContext?.let { ensureNotificationService(it) }
         notifyUi()
     }
 
@@ -160,7 +170,15 @@ object PlaybackManager {
     }
 
     fun togglePlayPause() {
-        exoPlayer?.let { if (it.isPlaying) it.pause() else it.play() }
+        exoPlayer?.let {
+            if (it.isPlaying) {
+                it.pause()
+            } else {
+                shouldStayPaused = false
+                it.play()
+                appContext?.let { context -> ensureNotificationService(context) }
+            }
+        }
         notifyUi()
     }
 
@@ -176,7 +194,11 @@ object PlaybackManager {
 
         val sameSong = currentSong()?.id == targetSong.id && hasActiveMedia()
         if (sameSong && !restart) {
-            if (!player.isPlaying) player.play()
+            if (!player.isPlaying) {
+                shouldStayPaused = false
+                player.play()
+            }
+            ensureNotificationService(context)
             notifyUi()
             return
         }
@@ -184,6 +206,18 @@ object PlaybackManager {
         shouldStayPaused = false
         val startPosition = if (sameSong && !restart) player.currentPosition else 0L
         setPlaylistOnPlayer(targetIndex, startPosition, playWhenReady = true)
+        ensureNotificationService(context)
+    }
+
+    fun ensureNotificationService(context: Context) {
+        if (!shouldShowNotification()) return
+
+        val intent = Intent(context.applicationContext, PlaybackNotificationService::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            ContextCompat.startForegroundService(context.applicationContext, intent)
+        } else {
+            context.applicationContext.startService(intent)
+        }
     }
 
     fun playNext() {
@@ -243,6 +277,14 @@ object PlaybackManager {
     }
 
     private fun songContentUri(song: Song): Uri {
+        if (song.data.startsWith("http://") ||
+            song.data.startsWith("https://") ||
+            song.data.startsWith("content://") ||
+            song.data.startsWith("file://")
+        ) {
+            return Uri.parse(song.data)
+        }
+
         return ContentUris.withAppendedId(
             MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
             song.id

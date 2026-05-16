@@ -15,6 +15,12 @@
     <string name="unknown_title">Unknown</string>
     <string name="unknown_artist">Unknown Artist</string>
     <string name="play_song">Play song</string>
+    <string name="pause_song">Pause song</string>
+    <string name="previous_song">Previous song</string>
+    <string name="next_song">Next song</string>
+    <string name="stop_song">Stop song</string>
+    <string name="playback_notification_channel">Music playback</string>
+    <string name="playback_notification_channel_description">Playback controls for currently playing music</string>
     <string name="open_player">Open player</string>
     <string name="like_song">Like song</string>
     <string name="unlike_song">Unlike song</string>
@@ -22,4 +28,8 @@
     <string name="removed_from_likes">Removed from likes</string>
     <string name="shuffle">Shuffle</string>
     <string name="repeat">Repeat</string>
+    <string name="search_songs_hint">Search songs or artists</string>
+    <string name="search_empty_title">No results found</string>
+    <string name="search_empty_message">Try searching for songs or artists</string>
+    <string name="back_button">Back</string>
 </resources>

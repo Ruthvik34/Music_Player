@@ -122,6 +122,7 @@ class PlayerActivity : AppCompatActivity() {
 
     override fun onPause() {
         handler.removeCallbacks(updateRunnable)
+        PlaybackManager.ensureNotificationService(this)
         super.onPause()
     }
 
@@ -285,6 +286,12 @@ class PlayerActivity : AppCompatActivity() {
         binding.tvTitle.text = song?.title ?: getString(R.string.unknown_title)
         binding.tvArtist.text = song?.artist ?: getString(R.string.unknown_artist)
 
+        val remoteImageUrl = song?.imageUrl
+        if (!remoteImageUrl.isNullOrBlank()) {
+            loadAlbumArt(remoteImageUrl)
+            return
+        }
+
         val albumId = song?.albumId ?: -1L
         if (albumId <= 0 || !hasAlbumArt(albumId)) {
             showDefaultAlbumArt()
@@ -296,8 +303,12 @@ class PlayerActivity : AppCompatActivity() {
             albumId
         )
 
+        loadAlbumArt(albumUri)
+    }
+
+    private fun loadAlbumArt(model: Any) {
         Glide.with(this)
-            .load(albumUri)
+            .load(model)
             .centerCrop()
             .placeholder(R.drawable.album_art_placeholder)
             .error(R.drawable.album_art_placeholder)
@@ -306,7 +317,7 @@ class PlayerActivity : AppCompatActivity() {
             .into(binding.ivMusicImage)
 
         Glide.with(this)
-            .load(albumUri)
+            .load(model)
             .apply(bitmapTransform(BlurTransformation(40, 4)))
             .placeholder(R.color.background_dark)
             .error(R.color.background_dark)

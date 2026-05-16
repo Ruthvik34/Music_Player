@@ -7,6 +7,7 @@
     <dimen name="spacing_xl">32dp</dimen>
 
     <dimen name="album_art_list">56dp</dimen>
+    <dimen name="music_mini_player_height">86dp</dimen>
     <dimen name="corner_radius_card">16dp</dimen>
     <dimen name="corner_radius_album">24dp</dimen>
 </resources>

@@ -51,19 +51,23 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-    implementation (libs.androidx.media3.exoplayer)
-    implementation (libs.androidx.media3.ui)
+    implementation(libs.androidx.media3.exoplayer)
+    implementation(libs.androidx.media3.ui)
 
     // Glide
-    implementation (libs.glide)
-    annotationProcessor (libs.compiler)
+    implementation(libs.glide)
+    annotationProcessor(libs.compiler)
 
     // Palette
-    implementation (libs.androidx.palette)
+    implementation(libs.androidx.palette)
 
     // WaveformSeekBar
-    implementation (libs.waveformseekbar)
+    implementation(libs.waveformseekbar)
 
     // Wasabeef Glide Transformations
-    implementation (libs.glide.transformations)
+    implementation(libs.glide.transformations)
+
+    implementation(libs.volley)
+
+    implementation(libs.gson)
 }

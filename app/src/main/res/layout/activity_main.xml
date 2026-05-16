@@ -30,17 +30,25 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <LinearLayout
+    <RelativeLayout
         android:id="@+id/headerLayout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
         android:paddingHorizontal="@dimen/spacing_lg"
         android:paddingTop="@dimen/spacing_xl"
         android:paddingBottom="@dimen/spacing_md"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
+
+        <ImageButton
+            android:background="@android:color/transparent"
+            android:layout_alignParentEnd="true"
+            android:id="@+id/btnSearch"
+            android:src="@drawable/ic_search_24"
+            android:layout_width="40dp"
+            android:layout_height="40dp"/>
+
 
         <TextView
             android:id="@+id/tvLibraryTitle"
@@ -52,6 +60,7 @@
             android:textStyle="bold" />
 
         <TextView
+            android:layout_below="@id/tvLibraryTitle"
             android:id="@+id/tvSubtitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -59,7 +68,9 @@
             android:textColor="@color/text_secondary"
             android:textSize="14sp"
             tools:text="24 songs" />
-    </LinearLayout>
+
+
+    </RelativeLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvSongsList"
