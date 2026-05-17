@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     id("kotlin-parcelize")
+    id("kotlin-kapt")
 }
 
 android {
@@ -20,7 +21,8 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -52,22 +54,12 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     implementation(libs.androidx.media3.exoplayer)
-    implementation(libs.androidx.media3.ui)
 
-    // Glide
     implementation(libs.glide)
-    annotationProcessor(libs.compiler)
-
-    // Palette
-    implementation(libs.androidx.palette)
-
-    // WaveformSeekBar
-    implementation(libs.waveformseekbar)
-
-    // Wasabeef Glide Transformations
     implementation(libs.glide.transformations)
-
     implementation(libs.volley)
-
     implementation(libs.gson)
+    implementation(libs.androidx.room.runtime)
+    kapt(libs.androidx.room.compiler)
+
 }

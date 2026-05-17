@@ -31,7 +31,7 @@
         android:textSize="16sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@id/tvArtist"
-        app:layout_constraintEnd_toStartOf="@id/ivLike"
+        app:layout_constraintEnd_toStartOf="@id/llContainer"
         app:layout_constraintStart_toEndOf="@id/ivArtist"
         app:layout_constraintTop_toTopOf="@id/ivArtist"
         app:layout_constraintVertical_chainStyle="packed"
@@ -48,24 +48,44 @@
         android:textColor="@color/text_secondary"
         android:textSize="14sp"
         app:layout_constraintBottom_toBottomOf="@id/ivArtist"
-        app:layout_constraintEnd_toStartOf="@id/ivLike"
+        app:layout_constraintEnd_toStartOf="@id/llContainer"
         app:layout_constraintStart_toEndOf="@id/ivArtist"
         app:layout_constraintTop_toBottomOf="@id/tvSongTitle"
         tools:text="Artist Name" />
 
-    <ImageButton
-        android:id="@+id/ivLike"
-        android:layout_width="36dp"
-        android:layout_height="36dp"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="@string/like_song"
-        android:padding="6dp"
-        android:scaleType="centerInside"
-        android:src="@drawable/outline_favorite_24"
+    <LinearLayout
+        app:layout_constraintStart_toEndOf="@id/tvSongTitle"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/ivPlayHint"
         app:layout_constraintTop_toTopOf="parent"
-        app:tint="@color/text_hint" />
+        android:visibility="visible"
+        android:id="@+id/llContainer"
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <ImageButton
+            android:id="@+id/ivLike"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/add_playlist"
+            android:scaleType="centerInside"
+            android:src="@drawable/outline_favorite_24"
+            app:tint="@color/text_hint" />
+
+        <ImageButton
+            android:visibility="gone"
+            android:id="@+id/btnAdd"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/like_song"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_add_24"
+            app:tint="@color/white" />
+
+    </LinearLayout>
 
     <ImageButton
         android:id="@+id/ivPlayHint"
@@ -73,7 +93,6 @@
         android:layout_height="40dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="@string/play_song"
-        android:padding="8dp"
         android:scaleType="centerInside"
         android:src="@drawable/ic_play_arrow_24"
         app:layout_constraintBottom_toBottomOf="parent"

@@ -3,6 +3,7 @@ package com.ruthvik.musicplayer
 import android.content.ContentUris
 import android.net.Uri
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.content.res.ColorStateList
 import androidx.core.content.ContextCompat
@@ -15,6 +16,8 @@ import com.ruthvik.musicplayer.databinding.ItemSongsBinding
 
 class SongAdapter(private val listener: OnItemClickListener) :
     ListAdapter<Song, SongAdapter.ViewHolder>(DiffCallBack()) {
+
+    var showRemoveButton: Boolean = false
 
     class ViewHolder(val binding: ItemSongsBinding) :
         RecyclerView.ViewHolder(binding.root)
@@ -39,12 +42,20 @@ class SongAdapter(private val listener: OnItemClickListener) :
         holder.binding.tvArtist.text = song.artist
 
         updateLikeButton(holder, song)
+        updateRemoveButton(holder, song)
         updatePlayButton(holder, song)
 
         holder.binding.ivLike.setOnClickListener {
             val pos = holder.bindingAdapterPosition
             if (pos != RecyclerView.NO_POSITION) {
                 listener.onLikeClick(pos, song)
+            }
+        }
+
+        holder.binding.btnAdd.setOnClickListener {
+            val pos = holder.bindingAdapterPosition
+            if (pos != RecyclerView.NO_POSITION) {
+                listener.onRemoveClick(pos, song)
             }
         }
 
@@ -62,7 +73,7 @@ class SongAdapter(private val listener: OnItemClickListener) :
         holder.binding.tvArtist.setOnClickListener { openPlayer() }
 
         Glide.with(holder.binding.root.context)
-            .load(albumUri)
+            .load(song.imageUrl ?: albumUri)
             .centerCrop()
             .placeholder(R.drawable.music)
             .error(R.drawable.music)
@@ -72,6 +83,7 @@ class SongAdapter(private val listener: OnItemClickListener) :
     private fun updateLikeButton(holder: ViewHolder, song: Song) {
         val liked = FavoritesManager.isLiked(song.id)
         val context = holder.binding.root.context
+        holder.binding.ivLike.visibility = View.VISIBLE
         holder.binding.ivLike.setImageResource(
             if (liked) R.drawable.ic_favorite_filled_24 else R.drawable.outline_favorite_24
         )
@@ -84,6 +96,16 @@ class SongAdapter(private val listener: OnItemClickListener) :
         holder.binding.ivLike.contentDescription = context.getString(
             if (liked) R.string.unlike_song else R.string.like_song
         )
+    }
+
+    private fun updateRemoveButton(holder: ViewHolder, song: Song) {
+        val context = holder.binding.root.context
+        holder.binding.btnAdd.visibility = if (showRemoveButton) View.VISIBLE else View.GONE
+        holder.binding.btnAdd.setImageResource(R.drawable.ic_cancel_24)
+        holder.binding.btnAdd.imageTintList = ColorStateList.valueOf(
+            ContextCompat.getColor(context, R.color.text_hint)
+        )
+        holder.binding.btnAdd.contentDescription = context.getString(R.string.remove_from_playlist)
     }
 
     private fun updatePlayButton(holder: ViewHolder, song: Song) {
@@ -105,5 +127,6 @@ class SongAdapter(private val listener: OnItemClickListener) :
         fun onPlayClick(position: Int)
         fun onItemClick(position: Int)
         fun onLikeClick(position: Int, song: Song)
+        fun onRemoveClick(position: Int, song: Song) {}
     }
 }

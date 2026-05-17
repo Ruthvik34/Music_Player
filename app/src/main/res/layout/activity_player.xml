@@ -37,7 +37,7 @@
         android:layout_marginStart="@dimen/spacing_md"
         android:layout_marginTop="@dimen/spacing_sm"
         android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="@string/library_title"
+        android:contentDescription="@string/back_button"
         android:padding="8dp"
         android:scaleType="centerInside"
         android:src="@drawable/ic_keyboard_arrow_left_24"
@@ -162,7 +162,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="00:00"
+            android:text="@string/zero_time"
             android:textColor="@color/text_hint"
             android:textSize="12sp" />
 
@@ -170,7 +170,7 @@
             android:id="@+id/tvEndTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="00:00"
+            android:text="@string/zero_time"
             android:textColor="@color/text_hint"
             android:textSize="12sp" />
     </LinearLayout>
@@ -241,7 +241,7 @@
             android:layout_width="52dp"
             android:layout_height="52dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@null"
+            android:contentDescription="@string/previous_song"
             android:padding="12dp"
             android:src="@drawable/ic_skip_previous_24"
             app:tint="@color/text_primary" />
@@ -252,7 +252,7 @@
             android:layout_height="64dp"
             android:layout_marginHorizontal="@dimen/spacing_xl"
             android:background="@drawable/play_button_bg"
-            android:contentDescription="@null"
+            android:contentDescription="@string/play_song"
             android:padding="16dp"
             android:scaleType="centerInside"
             android:src="@drawable/ic_play_arrow_24"
@@ -263,7 +263,7 @@
             android:layout_width="52dp"
             android:layout_height="52dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@null"
+            android:contentDescription="@string/next_song"
             android:padding="12dp"
             android:src="@drawable/ic_skip_next_24"
             app:tint="@color/text_primary" />

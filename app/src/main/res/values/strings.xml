@@ -3,13 +3,32 @@
     <string name="app_name">Music Player</string>
     <string name="splash_tagline">Your music, beautifully played</string>
     <string name="get_started">Get Started</string>
+
     <string name="library_title">Your Library</string>
     <string name="library_subtitle">%1$d songs</string>
-    <string name="library_subtitle_with_likes">%1$d songs · %2$d liked</string>
+    <string name="library_subtitle_with_likes">%1$d songs, %2$d liked</string>
     <string name="library_subtitle_empty">No songs yet</string>
     <string name="empty_library_title">No music found</string>
     <string name="empty_library_message">Add audio files to your device or grant storage permission to browse your library.</string>
     <string name="permission_denied">Permission denied. Cannot load songs.</string>
+
+    <string name="playlists_title">My Playlists</string>
+    <string name="select_playlist">Select a Playlist</string>
+    <string name="playlist_name">Playlist Name</string>
+    <string name="playlist_name_required">Playlist name cannot be empty</string>
+    <string name="create_playlist">Create Playlist</string>
+    <string name="create">Create</string>
+    <string name="cancel">Cancel</string>
+    <string name="add_playlist">Add playlist</string>
+    <string name="delete_playlist">Delete playlist</string>
+    <string name="playlist_deleted">Playlist deleted</string>
+    <string name="playlists_empty_title">No Playlists Yet</string>
+    <string name="playlists_empty_message">Create playlists while searching\nto organize your favorite songs</string>
+    <string name="song_added_to_playlist">"%1$s" added to "%2$s"</string>
+    <string name="playlist_created_and_song_added">Playlist "%1$s" created and song added</string>
+    <string name="zero_songs">0 songs</string>
+    <string name="song_count">%1$d songs</string>
+
     <string name="no_songs_available">No songs available</string>
     <string name="now_playing">Now Playing</string>
     <string name="unknown_title">Unknown</string>
@@ -19,15 +38,22 @@
     <string name="previous_song">Previous song</string>
     <string name="next_song">Next song</string>
     <string name="stop_song">Stop song</string>
+    <string name="open_player">Open player</string>
+    <string name="shuffle">Shuffle</string>
+    <string name="repeat">Repeat</string>
+    <string name="zero_time">00:00</string>
+
     <string name="playback_notification_channel">Music playback</string>
     <string name="playback_notification_channel_description">Playback controls for currently playing music</string>
-    <string name="open_player">Open player</string>
+
     <string name="like_song">Like song</string>
     <string name="unlike_song">Unlike song</string>
     <string name="added_to_likes">Added to likes</string>
     <string name="removed_from_likes">Removed from likes</string>
-    <string name="shuffle">Shuffle</string>
-    <string name="repeat">Repeat</string>
+    <string name="remove_from_playlist">Remove from playlist</string>
+    <string name="removed_from_playlist">Removed from playlist</string>
+
+    <string name="search">Search</string>
     <string name="search_songs_hint">Search songs or artists</string>
     <string name="search_empty_title">No results found</string>
     <string name="search_empty_message">Try searching for songs or artists</string>

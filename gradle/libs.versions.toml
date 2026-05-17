@@ -13,16 +13,14 @@ material = "1.13.0"
 activity = "1.13.0"
 constraintlayout = "2.2.1"
 media3Exoplayer = "1.10.1"
-palette = "1.0.0"
+roomRuntime = "2.8.4"
 volley = "1.2.1"
-waveformseekbar = "5.0.2"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-media3-exoplayer = { module = "androidx.media3:media3-exoplayer", version.ref = "media3Exoplayer" }
-androidx-media3-ui = { module = "androidx.media3:media3-ui", version.ref = "media3Exoplayer" }
-androidx-palette = { module = "androidx.palette:palette", version.ref = "palette" }
-compiler = { module = "com.github.bumptech.glide:compiler", version.ref = "glide" }
+androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomRuntime" }
+androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
 glide-transformations = { module = "jp.wasabeef:glide-transformations", version.ref = "glideTransformations" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
@@ -34,7 +32,6 @@ material = { group = "com.google.android.material", name = "material", version.r
 androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 volley = { module = "com.android.volley:volley", version.ref = "volley" }
-waveformseekbar = { module = "com.github.massoudss:waveformSeekBar", version.ref = "waveformseekbar" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

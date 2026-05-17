@@ -11,6 +11,7 @@ import android.provider.MediaStore
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
@@ -25,12 +26,12 @@ import com.bumptech.glide.request.RequestOptions.bitmapTransform
 import com.bumptech.glide.request.target.Target
 import com.google.android.material.slider.Slider
 import com.ruthvik.musicplayer.Models.Song
-import com.ruthvik.musicplayer.databinding.ActivityPalyerBinding
+import com.ruthvik.musicplayer.databinding.ActivityPlayerBinding
 import jp.wasabeef.glide.transformations.BlurTransformation
 
 class PlayerActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityPalyerBinding
+    private lateinit var binding: ActivityPlayerBinding
     private val handler = Handler(Looper.getMainLooper())
     private var isUserSeeking = false
     private var exoPlayer: ExoPlayer? = null
@@ -77,7 +78,7 @@ class PlayerActivity : AppCompatActivity() {
         setupDarkEdgeToEdge()
         PlaybackManager.init(this)
 
-        binding = ActivityPalyerBinding.inflate(layoutInflater)
+        binding = ActivityPlayerBinding.inflate(layoutInflater)
         setContentView(binding.root)
         binding.main.applySystemBarInsets()
 
@@ -111,6 +112,7 @@ class PlayerActivity : AppCompatActivity() {
         syncUiFromManager()
         setUpControls()
         setUpSeekBar()
+        setupBackHandler()
     }
 
     override fun onResume() {
@@ -130,11 +132,6 @@ class PlayerActivity : AppCompatActivity() {
         handler.removeCallbacks(updateRunnable)
         exoPlayer?.removeListener(playerListener)
         super.onDestroy()
-    }
-
-    override fun onBackPressed() {
-        PlaybackManager.stop()
-        super.onBackPressed()
     }
 
     private fun syncUiFromManager() {
@@ -208,6 +205,15 @@ class PlayerActivity : AppCompatActivity() {
         }
 
         setUpGestureDetectors()
+    }
+
+    private fun setupBackHandler() {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                PlaybackManager.stop()
+                finish()
+            }
+        })
     }
 
     private fun setUpGestureDetectors() {

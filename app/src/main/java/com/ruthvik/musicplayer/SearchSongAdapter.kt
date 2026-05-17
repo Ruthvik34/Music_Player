@@ -34,6 +34,7 @@ class SearchSongAdapter(private val listener: OnItemClickListener) :
             song.albumId
         )
         holder.binding.ivLike.visibility= View.GONE
+        holder.binding.btnAdd.visibility= View.VISIBLE
 
         holder.binding.tvSongTitle.text = song.title
         holder.binding.tvArtist.text = song.artist
@@ -57,6 +58,11 @@ class SearchSongAdapter(private val listener: OnItemClickListener) :
         holder.binding.ivArtist.setOnClickListener { openPlayer() }
         holder.binding.tvSongTitle.setOnClickListener { openPlayer() }
         holder.binding.tvArtist.setOnClickListener { openPlayer() }
+
+        holder.binding.btnAdd.setOnClickListener {
+
+            listener.onAddToPlayListClick(position,song)
+        }
 
         Glide.with(holder.binding.root.context)
             .load(song.imageUrl ?: albumUri)
@@ -85,6 +91,6 @@ class SearchSongAdapter(private val listener: OnItemClickListener) :
     interface OnItemClickListener {
         fun onPlayClick(position: Int)
         fun onItemClick(position: Int)
-        fun onLikeClick(position: Int, song: Song)
+        fun onAddToPlayListClick(position: Int, song: Song)
     }
 }

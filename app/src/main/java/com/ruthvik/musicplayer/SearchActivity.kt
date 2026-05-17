@@ -6,6 +6,8 @@ import android.content.pm.PackageManager
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.MotionEvent
+import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
@@ -19,7 +21,10 @@ import com.android.volley.Response
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.bumptech.glide.Glide
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.gson.Gson
+import com.ruthvik.musicplayer.BottomSheets.MusicPlayerCreatePlaylistBottomSheet
 import com.ruthvik.musicplayer.Models.MusicResponse
 import com.ruthvik.musicplayer.Models.Result
 import com.ruthvik.musicplayer.Models.Song
@@ -50,6 +55,8 @@ class SearchActivity : AppCompatActivity() {
         binding = ActivitySearchBinding.inflate(layoutInflater)
         setContentView(binding.root)
         binding.searchContainer.applySystemBarInsets()
+        PlaybackManager.init(this)
+        PlaylistManager.init(this)
         requestQueue = Volley.newRequestQueue(this)
         requestNotificationPermissionIfNeeded()
         setupRecyclerView()
@@ -83,12 +90,89 @@ class SearchActivity : AppCompatActivity() {
                 openPlayerActivity(position)
             }
 
-            override fun onLikeClick(position: Int, song: Song) {
-                toggleLike(song)
+            override fun onAddToPlayListClick(
+                position: Int,
+                song: Song
+            ) {
+                showBottomSheet(song)
             }
+
         })
         binding.rvSearchResults.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         binding.rvSearchResults.adapter = adapter
+    }
+
+
+    private fun showBottomSheet(song: Song) {
+
+        val dialog = BottomSheetDialog(this)
+
+        val view = layoutInflater.inflate(
+            R.layout.bottom_sheet_playlist,
+            null
+        )
+
+        dialog.setContentView(view)
+
+        val bottomSheet =
+            dialog.findViewById<FrameLayout>(
+                com.google.android.material.R.id.design_bottom_sheet
+            )
+
+        bottomSheet?.layoutParams?.height =
+            ViewGroup.LayoutParams.MATCH_PARENT
+
+        val rvPlaylists = view.findViewById<androidx.recyclerview.widget.RecyclerView>(
+            R.id.rvPlaylists
+        )
+        rvPlaylists.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+
+        val playlistAdapter = PlaylistAdapter(object : PlaylistAdapter.OnPlaylistClickListener {
+            override fun onPlaylistClick(playlist: Playlist) {
+                PlaylistManager.addSongToPlaylist(playlist.id, song)
+                Toast.makeText(
+                    this@SearchActivity,
+                    getString(R.string.song_added_to_playlist, song.title, playlist.name),
+                    Toast.LENGTH_SHORT
+                ).show()
+                dialog.dismiss()
+            }
+        })
+        rvPlaylists.adapter = playlistAdapter
+
+        // Load and display playlists
+        updatePlaylistRecyclerView(playlistAdapter)
+
+        val btnAdd = view.findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(
+            R.id.btnAdd
+        )
+
+        btnAdd.setOnClickListener {
+            val createDialog = MusicPlayerCreatePlaylistBottomSheet(this, object : MusicPlayerCreatePlaylistBottomSheet.OnOptionClick {
+                override fun onOptionSelect(playlistName: String) {
+                    val newPlaylist = PlaylistManager.createPlaylist(playlistName)
+                    PlaylistManager.addSongToPlaylist(newPlaylist.id, song)
+                    updatePlaylistRecyclerView(playlistAdapter)
+                    Toast.makeText(
+                        this@SearchActivity,
+                        getString(R.string.playlist_created_and_song_added, playlistName),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            })
+            createDialog.show()
+        }
+
+        val behavior = BottomSheetBehavior.from(bottomSheet!!)
+        behavior.state = BottomSheetBehavior.STATE_EXPANDED
+        behavior.skipCollapsed = true
+
+        dialog.show()
+    }
+
+    private fun updatePlaylistRecyclerView(adapter: PlaylistAdapter) {
+        val playlists = PlaylistManager.getAllPlaylists()
+        adapter.submitList(playlists.toList())
     }
 
     private fun setupSearchListener() {
@@ -205,17 +289,6 @@ class SearchActivity : AppCompatActivity() {
         binding.rvSearchResults.isVisible = !showEmpty
     }
 
-
-    private fun toggleLike(song: Song) {
-        val nowLiked = FavoritesManager.toggleLike(song.id)
-        Toast.makeText(
-            this,
-            if (nowLiked) R.string.added_to_likes else R.string.removed_from_likes,
-            Toast.LENGTH_SHORT
-        ).show()
-        adapter.notifyDataSetChanged()
-    }
-
     private fun handlePlayClick(position: Int) {
         if (position !in onlineSongs.indices) return
         val song = onlineSongs[position]
@@ -256,10 +329,9 @@ class SearchActivity : AppCompatActivity() {
             url,
             Response.Listener { response ->
                 val songsResponse = Gson().fromJson(response, MusicResponse::class.java)
-                submitOnlineSongs(songsResponse.data.results.mapNotNull { it.toSong() })
+                submitOnlineSongs(songsResponse.data?.results.orEmpty().mapNotNull { it.toSong() })
             },
-            Response.ErrorListener { error ->
-                error.printStackTrace()
+            Response.ErrorListener {
                 submitOnlineSongs(emptyList())
             }
         ).apply {
@@ -270,13 +342,20 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun Result.toSong(): Song? {
-        val audioUrl = downloadUrl.lastOrNull { it.link.isNotBlank() }?.link ?: return null
-        val artworkUrl = image.lastOrNull { it.link.isNotBlank() }?.link
+        val songId = id ?: return null
+        val songName = name ?: return null
+        val audioUrl = downloadUrl.orEmpty()
+            .mapNotNull { it.link?.takeIf(String::isNotBlank) }
+            .lastOrNull()
+            ?: return null
+        val artworkUrl = image.orEmpty()
+            .mapNotNull { it.link?.takeIf(String::isNotBlank) }
+            .lastOrNull()
 
         return Song(
-            id = id.toLongOrNull() ?: (id.hashCode().toLong() and 0xffffffffL),
-            title = name,
-            artist = primaryArtists.ifBlank { album.name },
+            id = songId.toLongOrNull() ?: (songId.hashCode().toLong() and 0xffffffffL),
+            title = songName,
+            artist = primaryArtists.orEmpty().ifBlank { album?.name.orEmpty() },
             data = audioUrl,
             albumId = 0L,
             imageUrl = artworkUrl

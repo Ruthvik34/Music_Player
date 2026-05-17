@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.provider.MediaStore
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -28,11 +29,13 @@ class MainActivity : AppCompatActivity() {
         setupDarkEdgeToEdge()
         PlaybackManager.init(this)
         FavoritesManager.init(this)
+        PlaylistManager.init(this)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         binding.main.applySystemBarInsets()
         requestNotificationPermissionIfNeeded()
         setupSearchButton()
+        setupBackHandler()
         binding.rvSongsList.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         checkPermissionsAndLoadSongs()
@@ -50,12 +53,7 @@ class MainActivity : AppCompatActivity() {
         super.onStop()
     }
 
-    override fun onBackPressed() {
-        PlaybackManager.stop()
-        super.onBackPressed()
-    }
-
-    fun checkPermissionsAndLoadSongs() {
+    private fun checkPermissionsAndLoadSongs() {
         val permission = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
             android.Manifest.permission.READ_MEDIA_AUDIO
         } else {
@@ -68,7 +66,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun getSongs(): List<Song> {
+    private fun getSongs(): List<Song> {
         val songList = ArrayList<Song>()
         val uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
         val selection = MediaStore.Audio.Media.IS_MUSIC + "!=0"
@@ -86,7 +84,7 @@ class MainActivity : AppCompatActivity() {
         return songList
     }
 
-    fun loadSongs() {
+    private fun loadSongs() {
         val allSongs = getSongs()
         songsList.clear()
         songsList.addAll(FavoritesManager.sortSongsLikedFirst(allSongs))
@@ -175,8 +173,32 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupSearchButton() {
         binding.btnSearch.setOnClickListener {
+            stopLibraryPlayback()
             startActivity(Intent(this, SearchActivity::class.java))
         }
+        binding.btnPlaylists.setOnClickListener {
+            stopLibraryPlayback()
+            startActivity(Intent(this, PlaylistsActivity::class.java))
+        }
+    }
+
+    private fun stopLibraryPlayback() {
+        val currentSong = PlaybackManager.currentSong() ?: return
+        val isLibrarySong = songsList.any { song ->
+            song.id == currentSong.id && song.data == currentSong.data
+        }
+        if (isLibrarySong) {
+            PlaybackManager.stop()
+        }
+    }
+
+    private fun setupBackHandler() {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                PlaybackManager.stop()
+                finish()
+            }
+        })
     }
 
     private fun requestNotificationPermissionIfNeeded() {
@@ -187,17 +209,6 @@ class MainActivity : AppCompatActivity() {
             ) != PackageManager.PERMISSION_GRANTED
         ) {
             requestNotificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
-        }
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == 1 && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            loadSongs()
         }
     }
 
