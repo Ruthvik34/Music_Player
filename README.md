@@ -1,12 +1,12 @@
 # Music_Player
 
-![Home](images/img1.jpeg)
-![Home](images/img2.jpeg)
-![Home](images/img3.jpeg)
-![Home](images/img4.jpeg)
-![Home](images/img5.jpeg)
-![Home](images/img6.jpeg)
-![Home](images/img7.jpeg)
+![Home](./images/img1.jpeg)
+![Home](./images/img2.jpeg)
+![Home](./images/img3.jpeg)
+![Home](./images/img4.jpeg)
+![Home](./images/img5.jpeg)
+![Home](./images/img6.jpeg)
+![Home](./images/img7.jpeg)
 
 
 
