@@ -1,5 +1,15 @@
 # Music_Player
 
+![Home](images/img1.jpeg)
+![Home](images/img2.jpeg)
+![Home](images/img3.jpeg)
+![Home](images/img4.jpeg)
+![Home](images/img5.jpeg)
+![Home](images/img6.jpeg)
+![Home](images/img7.jpeg)
+
+
+
 Simple Android music player built with Kotlin and ExoPlayer \(Media3\). Features include local audio playback, playlist support, shuffle (plays a random song immediately), repeat, double\-tap skip \(\+10s / \-10s\), and correct lifecycle handling so playback stops when closing the player.
 
 ## Features
