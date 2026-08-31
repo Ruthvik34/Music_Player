@@ -1,293 +1,672 @@
-package com.ruthvik.musicplayer
+import com.ruthvik.musicplayer.PlaybackNotificationService
+
+
 
 import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.net.Uri
+import android.os.Build
 import android.provider.MediaStore
 import androidx.core.content.ContextCompat
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
-import com.ruthvik.musicplayer.Models.Song
+import com.ruthvik.musicplayer.entities.Music
 
 object PlaybackManager {
 
     private var exoPlayer: ExoPlayer? = null
     private var appContext: Context? = null
-    private var songList: ArrayList<Song> = arrayListOf()
+
+    private var songList: ArrayList<Music> = arrayListOf()
+
     var currentIndex: Int = -1
         private set
+
     var isShuffle: Boolean = false
+
     var isRepeat: Boolean = false
+
     private var shouldStayPaused: Boolean = false
 
     private val uiListeners = mutableSetOf<() -> Unit>()
 
     private val internalListener = object : Player.Listener {
-        override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+
+        override fun onMediaItemTransition(
+            mediaItem: MediaItem?,
+            reason: Int
+        ) {
             updateCurrentIndexFromPlayer()
             notifyUi()
         }
 
-        override fun onPlaybackStateChanged(playbackState: Int) {
+        override fun onPlaybackStateChanged(
+            playbackState: Int
+        ) {
+
             if (playbackState == Player.STATE_READY) {
                 updateCurrentIndexFromPlayer()
             }
+
             notifyUi()
         }
 
-        override fun onIsPlayingChanged(isPlaying: Boolean) {
+        override fun onIsPlayingChanged(
+            isPlaying: Boolean
+        ) {
             notifyUi()
         }
 
-        override fun onShuffleModeEnabledChanged(shuffleModeEnabled: Boolean) {
+        override fun onShuffleModeEnabledChanged(
+            shuffleModeEnabled: Boolean
+        ) {
             isShuffle = shuffleModeEnabled
             notifyUi()
         }
     }
 
     fun init(context: Context) {
+
         appContext = context.applicationContext
+
         if (exoPlayer == null) {
-            exoPlayer = ExoPlayer.Builder(context.applicationContext)
-                .build()
-                .also { player ->
-                    player.addListener(internalListener)
-                    player.shuffleModeEnabled = isShuffle
-                    applyRepeatMode(player)
-                }
+
+            exoPlayer =
+                ExoPlayer.Builder(
+                    context.applicationContext
+                )
+                    .build()
+                    .also { player ->
+
+                        player.addListener(
+                            internalListener
+                        )
+
+                        player.shuffleModeEnabled =
+                            isShuffle
+
+                        applyRepeatMode(player)
+                    }
         }
     }
 
-    private fun applyRepeatMode(player: ExoPlayer) {
+    private fun applyRepeatMode(
+        player: ExoPlayer
+    ) {
+
         player.repeatMode =
-            if (isRepeat) Player.REPEAT_MODE_ONE else Player.REPEAT_MODE_OFF
+            if (isRepeat) {
+                Player.REPEAT_MODE_ONE
+            } else {
+                Player.REPEAT_MODE_OFF
+            }
     }
 
     private fun updateCurrentIndexFromPlayer() {
-        val index = exoPlayer?.currentMediaItemIndex ?: -1
-        if (index >= 0) currentIndex = index
+
+        val index =
+            exoPlayer?.currentMediaItemIndex
+                ?: -1
+
+        if (index >= 0) {
+            currentIndex = index
+        }
     }
 
-    private fun mediaItemsFrom(songs: List<Song>): List<MediaItem> =
-        songs.map { MediaItem.fromUri(songContentUri(it)) }
+    private fun mediaItemsFrom(
+        songs: List<Music>
+    ): List<MediaItem> {
 
-    private fun setPlaylistOnPlayer(startIndex: Int, startPositionMs: Long = 0L, playWhenReady: Boolean = true) {
-        val player = exoPlayer ?: return
-        if (songList.isEmpty()) return
+        return songs.map { song ->
+            MediaItem.fromUri(
+                songContentUri(song)
+            )
+        }
+    }
 
-        val index = startIndex.coerceIn(0, songList.lastIndex)
-        player.shuffleModeEnabled = isShuffle
+    private fun setPlaylistOnPlayer(
+        startIndex: Int,
+        startPositionMs: Long = 0L,
+        playWhenReady: Boolean = true
+    ) {
+
+        val player =
+            exoPlayer ?: return
+
+        if (songList.isEmpty()) {
+            return
+        }
+
+        val index =
+            startIndex.coerceIn(
+                0,
+                songList.lastIndex
+            )
+
+        player.shuffleModeEnabled =
+            isShuffle
+
         applyRepeatMode(player)
-        player.setMediaItems(mediaItemsFrom(songList), index, startPositionMs)
+
+        player.setMediaItems(
+            mediaItemsFrom(songList),
+            index,
+            startPositionMs
+        )
+
         player.prepare()
-        if (playWhenReady && !shouldStayPaused) player.play()
+
+        if (
+            playWhenReady &&
+            !shouldStayPaused
+        ) {
+            player.play()
+        }
+
         currentIndex = index
+
         notifyUi()
     }
 
-    fun getPlayer(): ExoPlayer? = exoPlayer
+    fun getPlayer(): ExoPlayer? {
+        return exoPlayer
+    }
 
-    fun getSongList(): ArrayList<Song> = ArrayList(songList)
+    fun getSongList(): ArrayList<Music> {
+        return ArrayList(songList)
+    }
 
-    fun currentSong(): Song? = songList.getOrNull(exoPlayer?.currentMediaItemIndex ?: currentIndex)
+    fun currentSong(): Music? {
 
-    fun hasActiveMedia(): Boolean =
-        songList.isNotEmpty() &&
-            (exoPlayer?.playbackState ?: Player.STATE_IDLE) != Player.STATE_IDLE
+        val index =
+            exoPlayer?.currentMediaItemIndex
+                ?: currentIndex
 
-    fun shouldShowNotification(): Boolean =
-        hasActiveMedia() && !shouldStayPaused
+        return songList.getOrNull(index)
+    }
 
-    fun isPlaying(): Boolean = exoPlayer?.isPlaying == true
+    fun hasActiveMedia(): Boolean {
 
-    fun isPlayingSong(songId: Long): Boolean =
-        currentSong()?.id == songId && isPlaying()
+        return songList.isNotEmpty() &&
+                (
+                        exoPlayer?.playbackState
+                            ?: Player.STATE_IDLE
+                        ) != Player.STATE_IDLE
+    }
 
-    fun isCurrentSong(songId: Long): Boolean =
-        currentSong()?.id == songId && hasActiveMedia()
+    fun shouldShowNotification(): Boolean {
 
-    fun syncCurrentIndex(sortedSongs: List<Song>) {
-        val playing = currentSong()
-        val positionMs = exoPlayer?.currentPosition ?: 0L
-        val wasPlaying = isPlaying()
-        songList = ArrayList(sortedSongs)
-        val newIndex = playing?.let { s -> songList.indexOfFirst { it.id == s.id } } ?: -1
+        return hasActiveMedia() &&
+                !shouldStayPaused
+    }
+
+    fun isPlaying(): Boolean {
+        return exoPlayer?.isPlaying == true
+    }
+
+    fun isPlayingSong(
+        songId: String?
+    ): Boolean {
+
+        return songId != null &&
+                currentSong()?.id == songId &&
+                isPlaying()
+    }
+
+    fun isCurrentSong(
+        songId: String?
+    ): Boolean {
+
+        return songId != null &&
+                currentSong()?.id == songId &&
+                hasActiveMedia()
+    }
+
+    fun syncCurrentIndex(
+        sortedSongs: List<Music>
+    ) {
+
+        val playing =
+            currentSong()
+
+        val positionMs =
+            exoPlayer?.currentPosition
+                ?: 0L
+
+        val wasPlaying =
+            isPlaying()
+
+        songList =
+            ArrayList(sortedSongs)
+
+        val newIndex =
+            playing?.let { current ->
+
+                songList.indexOfFirst {
+                    it.id == current.id
+                }
+
+            } ?: -1
+
         if (newIndex >= 0) {
-            setPlaylistOnPlayer(newIndex, positionMs, playWhenReady = wasPlaying)
+
+            setPlaylistOnPlayer(
+                newIndex,
+                positionMs,
+                playWhenReady = wasPlaying
+            )
         }
     }
 
-    fun setPlaylist(songs: List<Song>) {
-        songList = ArrayList(songs)
+    fun setPlaylist(
+        songs: List<Music>
+    ) {
+
+        songList =
+            ArrayList(songs)
     }
 
-    /** Updates queue order while keeping the current song and playback position. */
-    fun updatePlaylistKeepingPlayback(songs: List<Song>) {
-        val current = currentSong()
-        val positionMs = exoPlayer?.currentPosition ?: 0L
-        val wasPlaying = isPlaying()
-        songList = ArrayList(songs)
-        val index = current?.let { s -> songList.indexOfFirst { it.id == s.id } }
-            ?: exoPlayer?.currentMediaItemIndex
-            ?: 0
-        if (index >= 0 && songList.isNotEmpty()) {
-            setPlaylistOnPlayer(index.coerceIn(0, songList.lastIndex), positionMs, wasPlaying)
+    /**
+     * Updates queue order while keeping
+     * the current song and playback position.
+     */
+    fun updatePlaylistKeepingPlayback(
+        songs: List<Music>
+    ) {
+
+        val current =
+            currentSong()
+
+        val positionMs =
+            exoPlayer?.currentPosition
+                ?: 0L
+
+        val wasPlaying =
+            isPlaying()
+
+        songList =
+            ArrayList(songs)
+
+        val index =
+            current?.let { currentSong ->
+
+                songList.indexOfFirst {
+                    it.id == currentSong.id
+                }
+
+            }
+                ?: exoPlayer?.currentMediaItemIndex
+                ?: 0
+
+        if (
+            index >= 0 &&
+            songList.isNotEmpty()
+        ) {
+
+            setPlaylistOnPlayer(
+                index.coerceIn(
+                    0,
+                    songList.lastIndex
+                ),
+                positionMs,
+                wasPlaying
+            )
         }
     }
 
-    fun addUiListener(listener: () -> Unit) {
+    fun addUiListener(
+        listener: () -> Unit
+    ) {
+
         uiListeners.add(listener)
     }
 
-    fun removeUiListener(listener: () -> Unit) {
+    fun removeUiListener(
+        listener: () -> Unit
+    ) {
+
         uiListeners.remove(listener)
     }
 
     private fun notifyUi() {
-        uiListeners.forEach { it.invoke() }
+
+        uiListeners.forEach {
+            it.invoke()
+        }
     }
 
     fun play() {
+
         shouldStayPaused = false
+
         exoPlayer?.play()
-        appContext?.let { ensureNotificationService(it) }
+
+        appContext?.let {
+            ensureNotificationService(it)
+        }
+
         notifyUi()
     }
 
     fun pause() {
+
         exoPlayer?.pause()
+
         notifyUi()
     }
 
     fun stop() {
+
         exoPlayer?.pause()
+
         shouldStayPaused = true
+
         notifyUi()
     }
 
     fun togglePlayPause() {
-        exoPlayer?.let {
-            if (it.isPlaying) {
-                it.pause()
+
+        exoPlayer?.let { player ->
+
+            if (player.isPlaying) {
+
+                player.pause()
+
             } else {
+
                 shouldStayPaused = false
-                it.play()
-                appContext?.let { context -> ensureNotificationService(context) }
+
+                player.play()
+
+                appContext?.let { context ->
+                    ensureNotificationService(
+                        context
+                    )
+                }
             }
         }
+
         notifyUi()
     }
 
-    fun playAt(context: Context, listIndex: Int, songs: List<Song>, restart: Boolean = true) {
+    fun playAt(
+        context: Context,
+        listIndex: Int,
+        songs: List<Music>,
+        restart: Boolean = true
+    ) {
+
         init(context)
-        songList = ArrayList(songs)
-        if (listIndex !in songs.indices) return
 
-        val player = exoPlayer ?: return
-        val targetSong = songs[listIndex]
-        val targetIndex = songList.indexOfFirst { it.id == targetSong.id }
-        if (targetIndex < 0) return
+        if (listIndex !in songs.indices) {
+            return
+        }
 
-        val sameSong = currentSong()?.id == targetSong.id && hasActiveMedia()
-        if (sameSong && !restart) {
+        songList =
+            ArrayList(songs)
+
+        val player =
+            exoPlayer ?: return
+
+        val targetSong =
+            songs[listIndex]
+
+        val targetIndex =
+            songList.indexOfFirst {
+                it.id == targetSong.id
+            }
+
+        if (targetIndex < 0) {
+            return
+        }
+
+        val sameSong =
+            currentSong()?.id == targetSong.id &&
+                    hasActiveMedia()
+
+        if (
+            sameSong &&
+            !restart
+        ) {
+
             if (!player.isPlaying) {
+
                 shouldStayPaused = false
+
                 player.play()
             }
+
             ensureNotificationService(context)
+
             notifyUi()
+
             return
         }
 
         shouldStayPaused = false
-        val startPosition = if (sameSong && !restart) player.currentPosition else 0L
-        setPlaylistOnPlayer(targetIndex, startPosition, playWhenReady = true)
+
+        val startPosition =
+            if (
+                sameSong &&
+                !restart
+            ) {
+                player.currentPosition
+            } else {
+                0L
+            }
+
+        setPlaylistOnPlayer(
+            targetIndex,
+            startPosition,
+            playWhenReady = true
+        )
+
         ensureNotificationService(context)
     }
 
-    fun ensureNotificationService(context: Context) {
-        if (!shouldShowNotification()) return
+    fun ensureNotificationService(
+        context: Context
+    ) {
 
-        val intent = Intent(context.applicationContext, PlaybackNotificationService::class.java)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            ContextCompat.startForegroundService(context.applicationContext, intent)
+        if (!shouldShowNotification()) {
+            return
+        }
+
+        val intent =
+            Intent(
+                context.applicationContext,
+                PlaybackNotificationService::class.java
+            )
+
+        if (
+            Build.VERSION.SDK_INT >=
+            Build.VERSION_CODES.O
+        ) {
+
+            ContextCompat.startForegroundService(
+                context.applicationContext,
+                intent
+            )
+
         } else {
-            context.applicationContext.startService(intent)
+
+            context.applicationContext.startService(
+                intent
+            )
         }
     }
 
     fun playNext() {
-        val player = exoPlayer ?: return
-        if (player.hasNextMediaItem()) {
+
+        val player =
+            exoPlayer ?: return
+
+        if (
+            player.hasNextMediaItem()
+        ) {
+
             player.seekToNextMediaItem()
-        } else if (songList.size > 1) {
-            setPlaylistOnPlayer(0, playWhenReady = true)
+
+        } else if (
+            songList.size > 1
+        ) {
+
+            setPlaylistOnPlayer(
+                0,
+                playWhenReady = true
+            )
         }
+
         updateCurrentIndexFromPlayer()
+
         notifyUi()
     }
 
     fun playPrevious() {
-        val player = exoPlayer ?: return
-        if (player.currentPosition > 3000) {
+
+        val player =
+            exoPlayer ?: return
+
+        if (
+            player.currentPosition > 3000
+        ) {
+
             player.seekTo(0)
-        } else if (player.hasPreviousMediaItem()) {
+
+        } else if (
+            player.hasPreviousMediaItem()
+        ) {
+
             player.seekToPreviousMediaItem()
-        } else if (songList.isNotEmpty()) {
-            setPlaylistOnPlayer(songList.lastIndex, playWhenReady = true)
+
+        } else if (
+            songList.isNotEmpty()
+        ) {
+
+            setPlaylistOnPlayer(
+                songList.lastIndex,
+                playWhenReady = true
+            )
         }
+
         updateCurrentIndexFromPlayer()
+
         notifyUi()
     }
 
     fun toggleShuffle() {
-        val player = exoPlayer ?: return
-        if (songList.isEmpty()) return
 
-        // Play a random song immediately
-        val randomIndex = songList.indices.random()
-        setPlaylistOnPlayer(randomIndex, playWhenReady = true)
+        val player =
+            exoPlayer ?: return
+
+        if (songList.isEmpty()) {
+            return
+        }
+
+        val randomIndex =
+            songList.indices.random()
+
+        setPlaylistOnPlayer(
+            randomIndex,
+            playWhenReady = true
+        )
+
         isShuffle = true
-        player.shuffleModeEnabled = isShuffle
+
+        player.shuffleModeEnabled =
+            isShuffle
+
         notifyUi()
     }
 
     fun toggleRepeat() {
-        isRepeat = !isRepeat
-        exoPlayer?.let { applyRepeatMode(it) }
+
+        isRepeat =
+            !isRepeat
+
+        exoPlayer?.let {
+            applyRepeatMode(it)
+        }
+
         notifyUi()
     }
 
-    fun seekToProgress(progress: Float) {
-        val player = exoPlayer ?: return
-        val duration = usableDuration()
+    fun seekToProgress(
+        progress: Float
+    ) {
+
+        val player =
+            exoPlayer ?: return
+
+        val duration =
+            usableDuration()
+
         if (duration > 0) {
-            player.seekTo((duration * progress / 100f).toLong())
+
+            player.seekTo(
+                (
+                        duration *
+                                progress /
+                                100f
+                        ).toLong()
+            )
+
             notifyUi()
         }
     }
 
     fun usableDuration(): Long {
-        val duration = exoPlayer?.duration ?: return 0L
-        return if (duration > 0 && duration != C.TIME_UNSET) duration else 0L
+
+        val duration =
+            exoPlayer?.duration
+                ?: return 0L
+
+        return if (
+            duration > 0 &&
+            duration != C.TIME_UNSET
+        ) {
+            duration
+        } else {
+            0L
+        }
     }
 
-    private fun songContentUri(song: Song): Uri {
-        if (song.data.startsWith("http://") ||
-            song.data.startsWith("https://") ||
-            song.data.startsWith("content://") ||
-            song.data.startsWith("file://")
+    private fun songContentUri(
+        song: Music
+    ): Uri {
+
+        val mediaUrl =
+            song.media_url
+
+        if (
+            mediaUrl.startsWith("http://") ||
+            mediaUrl.startsWith("https://") ||
+            mediaUrl.startsWith("content://") ||
+            mediaUrl.startsWith("file://")
         ) {
-            return Uri.parse(song.data)
+
+            return Uri.parse(
+                mediaUrl
+            )
         }
 
-        return ContentUris.withAppendedId(
-            MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-            song.id
+        val localId =
+            song.id.toLongOrNull()
+
+        if (localId != null) {
+
+            return ContentUris.withAppendedId(
+                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                localId
+            )
+        }
+
+        return Uri.parse(
+            mediaUrl
         )
     }
 }
+

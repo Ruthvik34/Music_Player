@@ -1,8 +1,11 @@
 package com.ruthvik.musicplayer
 
+import com.ruthvik.musicplayer.entities.Music
+
+
+
 import android.content.Context
 import android.content.SharedPreferences
-import com.ruthvik.musicplayer.Models.Song
 
 object FavoritesManager {
 
@@ -13,38 +16,79 @@ object FavoritesManager {
 
     fun init(context: Context) {
         if (!::prefs.isInitialized) {
-            prefs = context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            prefs = context.applicationContext.getSharedPreferences(
+                PREFS_NAME,
+                Context.MODE_PRIVATE
+            )
         }
     }
 
-    fun isLiked(songId: Long): Boolean = getLikedIds().contains(songId)
+    fun isLiked(songId: String?): Boolean {
+        if (songId.isNullOrBlank()) return false
 
-    fun toggleLike(songId: Long): Boolean {
-        val liked = getLikedIds().toMutableSet()
-        val nowLiked = if (liked.contains(songId)) {
-            liked.remove(songId)
-            false
-        } else {
-            liked.add(songId)
-            true
+        return getLikedIds().contains(songId)
+    }
+
+    fun toggleLike(songId: String?): Boolean {
+
+        if (songId.isNullOrBlank()) {
+            return false
         }
-        prefs.edit().putStringSet(KEY_LIKED_IDS, liked.map { it.toString() }.toSet()).apply()
+
+        val liked =
+            getLikedIds().toMutableSet()
+
+        val nowLiked =
+            if (liked.contains(songId)) {
+
+                liked.remove(songId)
+                false
+
+            } else {
+
+                liked.add(songId)
+                true
+            }
+
+        prefs.edit()
+            .putStringSet(
+                KEY_LIKED_IDS,
+                liked
+            )
+            .apply()
+
         return nowLiked
     }
 
-    fun sortSongsLikedFirst(songs: List<Song>): List<Song> {
-        val liked = getLikedIds()
+    fun sortSongsLikedFirst(
+        songs: List<Music>
+    ): List<Music> {
+
+        val liked =
+            getLikedIds()
+
         return songs.sortedWith(
-            compareByDescending<Song> { liked.contains(it.id) }
-                .thenBy { it.title.lowercase() }
+
+            compareByDescending<Music> {
+                liked.contains(it.id)
+            }.thenBy {
+
+                it.song
+                    .orEmpty()
+                    .lowercase()
+            }
         )
     }
 
-    private fun getLikedIds(): Set<Long> {
-        if (!::prefs.isInitialized) return emptySet()
-        return prefs.getStringSet(KEY_LIKED_IDS, emptySet())
-            ?.mapNotNull { it.toLongOrNull() }
-            ?.toSet()
-            ?: emptySet()
+    private fun getLikedIds(): Set<String> {
+
+        if (!::prefs.isInitialized) {
+            return emptySet()
+        }
+
+        return prefs.getStringSet(
+            KEY_LIKED_IDS,
+            emptySet()
+        ) ?: emptySet()
     }
 }

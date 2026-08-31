@@ -1,0 +1,53 @@
+package com.ruthvik.musicplayer.entities
+
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+@Parcelize
+data class Music(
+    val `320kbps`: String,
+    val album: String,
+    val album_url: String,
+    val albumid: String,
+    val artistMap: ArtistMap,
+    val cache_state: String,
+    val copyright_text: String,
+    val disabled: String,
+    val disabled_text: String,
+    val duration: String,
+    val encrypted_drm_media_url: String,
+    val encrypted_media_path: String,
+    val encrypted_media_url: String,
+    val explicit_content: Int,
+    val featured_artists: String,
+    val featured_artists_id: String,
+    val has_lyrics: String,
+    val has_trivia: Boolean,
+    val id: String,
+    val image: String,
+    val is_dolby_content: Boolean,
+    val is_drm: Int,
+    val label: String,
+    val label_id: String,
+    val label_url: String,
+    val language: String,
+    val lyrics_snippet: String,
+    val media_preview_url: String,
+    val media_url: String,
+    val music: String,
+    val music_id: String,
+    val origin: String,
+    val perma_url: String,
+    val play_count: Int,
+    val primary_artists: String,
+    val primary_artists_id: String,
+    val release_date: String,
+    val singers: String,
+    val song: String,
+    val starred: String,
+    val starring: String,
+    val triller_available: Boolean,
+    val type: String,
+    val webp: Boolean,
+    val year: String
+) : Parcelable

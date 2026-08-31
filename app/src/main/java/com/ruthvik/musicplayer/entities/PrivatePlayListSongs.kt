@@ -1,4 +1,4 @@
-package com.ruthvik.musicplayer.Models
+package com.ruthvik.musicplayer.entities
 
 import androidx.room.Entity
 
@@ -7,12 +7,20 @@ import androidx.room.Entity
     primaryKeys = ["playlistId", "songId"]
 )
 data class PrivatePlayListSongs(
+
     val playlistId: String,
-    val songId: Long,
-    val title: String,
-    val artist: String,
-    val data: String,
-    val albumId: Long,
-    val imageUrl: String? = null,
+
+    val songId: String,
+
+    val song: String,
+
+    val primary_artists: String,
+
+    val media_url: String,
+
+    val albumid: String,
+
+    val image: String,
+
     val addedAt: Long = System.currentTimeMillis()
 )

@@ -1,7 +1,6 @@
-package com.ruthvik.musicplayer
+import com.ruthvik.musicplayer.R
 
-import android.content.ContentUris
-import android.net.Uri
+
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,88 +8,189 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.ruthvik.musicplayer.Models.Song
 import com.ruthvik.musicplayer.databinding.ItemSongsBinding
+import com.ruthvik.musicplayer.entities.Music
 
-class SearchSongAdapter(private val listener: OnItemClickListener) :
-    ListAdapter<Song, SearchSongAdapter.ViewHolder>(DiffCallBack()) {
+class SearchSongAdapter(
+    private val listener: OnItemClickListener
+) : ListAdapter<Music, SearchSongAdapter.ViewHolder>(DiffCallBack()) {
 
-    class ViewHolder(val binding: ItemSongsBinding) :
-        RecyclerView.ViewHolder(binding.root)
+    class ViewHolder(
+        val binding: ItemSongsBinding
+    ) : RecyclerView.ViewHolder(binding.root)
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int
+    ): ViewHolder {
+
         val binding = ItemSongsBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
             false
         )
+
         return ViewHolder(binding)
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val song = getItem(position)
-        val albumUri = ContentUris.withAppendedId(
-            Uri.parse("content://media/external/audio/albumart"),
-            song.albumId
+    override fun onBindViewHolder(
+        holder: ViewHolder,
+        position: Int
+    ) {
+
+        val music = getItem(position)
+
+        holder.binding.ivLike.visibility =
+            View.GONE
+
+        holder.binding.btnAdd.visibility =
+            View.VISIBLE
+
+        // Song name
+        holder.binding.tvSongTitle.text =
+            music.song.orEmpty()
+
+        // Artist name
+        holder.binding.tvArtist.text =
+            music.primary_artists
+                .orEmpty()
+                .ifBlank {
+                    music.singers.orEmpty()
+                }
+
+        updatePlayButton(
+            holder,
+            music
         )
-        holder.binding.ivLike.visibility= View.GONE
-        holder.binding.btnAdd.visibility= View.VISIBLE
-
-        holder.binding.tvSongTitle.text = song.title
-        holder.binding.tvArtist.text = song.artist
-
-        updatePlayButton(holder, song)
 
         holder.binding.ivPlayHint.setOnClickListener {
-            val pos = holder.bindingAdapterPosition
-            if (pos != RecyclerView.NO_POSITION) {
+
+            val pos =
+                holder.bindingAdapterPosition
+
+            if (
+                pos != RecyclerView.NO_POSITION
+            ) {
                 listener.onPlayClick(pos)
             }
         }
 
         val openPlayer = {
-            val pos = holder.bindingAdapterPosition
-            if (pos != RecyclerView.NO_POSITION) {
+
+            val pos =
+                holder.bindingAdapterPosition
+
+            if (
+                pos != RecyclerView.NO_POSITION
+            ) {
                 listener.onItemClick(pos)
             }
         }
-        holder.binding.root.setOnClickListener { openPlayer() }
-        holder.binding.ivArtist.setOnClickListener { openPlayer() }
-        holder.binding.tvSongTitle.setOnClickListener { openPlayer() }
-        holder.binding.tvArtist.setOnClickListener { openPlayer() }
+
+        holder.binding.root.setOnClickListener {
+            openPlayer()
+        }
+
+        holder.binding.ivArtist.setOnClickListener {
+            openPlayer()
+        }
+
+        holder.binding.tvSongTitle.setOnClickListener {
+            openPlayer()
+        }
+
+        holder.binding.tvArtist.setOnClickListener {
+            openPlayer()
+        }
 
         holder.binding.btnAdd.setOnClickListener {
 
-            listener.onAddToPlayListClick(position,song)
+            val pos =
+                holder.bindingAdapterPosition
+
+            if (
+                pos != RecyclerView.NO_POSITION
+            ) {
+                listener.onAddToPlayListClick(
+                    pos,
+                    music
+                )
+            }
         }
 
-        Glide.with(holder.binding.root.context)
-            .load(song.imageUrl ?: albumUri)
+        // JioSaavn image URL
+        Glide.with(
+            holder.binding.root.context
+        )
+            .load(
+                music.image
+                    ?.takeIf { it.isNotBlank() }
+            )
             .centerCrop()
-            .placeholder(R.drawable.music)
-            .error(R.drawable.music)
-            .into(holder.binding.ivArtist)
+            .placeholder(
+                R.drawable.music
+            )
+            .error(
+                R.drawable.music
+            )
+            .into(
+                holder.binding.ivArtist
+            )
     }
 
+    private fun updatePlayButton(
+        holder: ViewHolder,
+        music: Music
+    ) {
 
-    private fun updatePlayButton(holder: ViewHolder, song: Song) {
         holder.binding.ivPlayHint.setImageResource(
-            if (PlaybackManager.isPlayingSong(song.id)) R.drawable.ic_pause_24
-            else R.drawable.ic_play_arrow_24
+
+            if (
+                PlaybackManager.isPlayingSong(
+                    music.id
+                )
+            ) {
+                R.drawable.ic_pause_24
+            } else {
+                R.drawable.ic_play_arrow_24
+            }
         )
     }
 
-    class DiffCallBack : DiffUtil.ItemCallback<Song>() {
-        override fun areItemsTheSame(oldItem: Song, newItem: Song): Boolean =
-            oldItem.id == newItem.id
+    class DiffCallBack :
+        DiffUtil.ItemCallback<Music>() {
 
-        override fun areContentsTheSame(oldItem: Song, newItem: Song): Boolean =
-            oldItem == newItem
+        override fun areItemsTheSame(
+            oldItem: Music,
+            newItem: Music
+        ): Boolean {
+
+            return oldItem.id == newItem.id
+        }
+
+        override fun areContentsTheSame(
+            oldItem: Music,
+            newItem: Music
+        ): Boolean {
+
+            return oldItem == newItem
+        }
     }
 
     interface OnItemClickListener {
-        fun onPlayClick(position: Int)
-        fun onItemClick(position: Int)
-        fun onAddToPlayListClick(position: Int, song: Song)
+
+        fun onPlayClick(
+            position: Int
+        )
+
+        fun onItemClick(
+            position: Int
+        )
+
+        fun onAddToPlayListClick(
+            position: Int,
+            song: Music
+        )
     }
 }
+
